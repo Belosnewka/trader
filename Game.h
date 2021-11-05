@@ -109,6 +109,7 @@ bool processOrders()
 	if (((clock() - start) / CLOCKS_PER_SEC) < 2)
 	{
 		std::string str = "t";
+		int lim[] = { 0,0,0,0,0 };
 		while (str != "next")
 		{
 			while (std::cin >> str)
@@ -118,6 +119,11 @@ bool processOrders()
 					return true;
 				if (str == "next" || vec.size() == 3)
 					break;
+			}
+			if (vec.size() == 0)
+			{
+				std::cout << "Ошибка операции" << std::endl;
+				continue;
 			}
 			str = vec[0];
 			if (str == "sell")
@@ -133,11 +139,12 @@ bool processOrders()
 						break;
 					}
 				}
-				if (pos < 0 || tools[pos].getCountSell() < cnt || cnt > tools[pos].getCountBuy())
+				if (pos < 0 || cnt + lim[pos] > tools[pos].getCountBuy() || tools[pos].getPosition() < cnt)
 					std::cout << "Ошибка операции" << std::endl;
 				else
 				{
 					tools[pos].updatePosition(-cnt);
+					lim[pos] -= cnt;
 					money += cnt*tools[pos].getPriceSell();
 					std::cout << "Операция проведена успешно. Средств на счету: " << money << std::endl;
 				}
@@ -155,12 +162,13 @@ bool processOrders()
 						break;
 					}
 				}
-				if (pos < 0 || cnt * tools[pos].getPriceBuy() > money || cnt > tools[pos].getCountSell())
+				if (pos < 0 || cnt * tools[pos].getPriceBuy() > money || cnt + lim[pos] > tools[pos].getCountSell())
 					std::cout << "Ошибка операции" << std::endl;
 				else
 				{
 					tools[pos].updatePosition(cnt);
 					money -= cnt * tools[pos].getPriceBuy();
+					lim[pos] += cnt;
 					std::cout << "Операция проведена успешно. Средств на счету: " << money << std::endl;
 				}
 			}
